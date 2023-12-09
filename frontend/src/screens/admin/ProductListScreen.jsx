@@ -8,23 +8,25 @@ import Paginate from '../../components/Paginate';
 import {
   useGetProductsQuery,
   useCreateProductMutation,
-//   useDeleteProductMutation,
+  useDeleteProductMutation,
 } from '../../slices/productsApiSlice';
 import { toast } from 'react-toastify';
+
 import product from '../../components/product';
 
 const ProductListScreen = () => {
-//   const { pageNumber } = useParams();
+  const { pageNumber } = useParams();
 
-  const { data:products, isLoading, error, refetch } = useGetProductsQuery();
+  const { data, isLoading, error, refetch } = useGetProductsQuery({pageNumber});
 
-//   const [deleteProduct, { isLoading: loadingDelete }] =
-//     useDeleteProductMutation();
+  const [deleteProduct, { isLoading: loadingDelete }] =
+    useDeleteProductMutation();
 
   const deleteHandler = async (id) => {
     if (window.confirm('Are you sure')) {
       try {
         await deleteProduct(id);
+        toast.success('Product Deleted')
         refetch();
       } catch (err) {
         toast.error(err?.data?.Message || err.error);
@@ -59,6 +61,7 @@ const ProductListScreen = () => {
         </Col>
       </Row>
       {loadingCreate && <Loader />}
+      {loadingDelete && <Loader />}
       {isLoading ?<Loader/>:error?<Message variant='danger'>
         {error}
       </Message>:(
@@ -78,7 +81,7 @@ const ProductListScreen = () => {
                 </tr>
             </thead>
             <tbody>
-                {products.map((product)=>(
+                {data.products.map((product)=>(
                     <tr key={product._id}>
                            <td>{product._id}</td>
                   <td>{product.name}</td>
@@ -108,7 +111,7 @@ const ProductListScreen = () => {
 
 
         </Table>
-
+            <Paginate pages={data.pages} page={data.page} isAdmin={true}/>
 
 
         </>
